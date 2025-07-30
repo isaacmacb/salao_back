@@ -23,6 +23,9 @@ public class Financeiro {
 
     private String tipo; // ENTRADA ou SAÍDA
 
+    @ManyToOne
+    private Servico servico;
+
     private BigDecimal valor;
 
     private String descricao;
