@@ -2,21 +2,21 @@ package com.app.salaodesobrancelhas.controller;
 
 import com.app.salaodesobrancelhas.entity.Financeiro;
 import com.app.salaodesobrancelhas.service.FinanceiroService;
-import jakarta.validation.Valid;
-import org.springframework.ui.Model;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-@Controller
-@RequestMapping("/financeiro")
+@RestController
+@RequestMapping("/api/financeiro")
 @CrossOrigin(origins = {"http://127.0.0.1:5500", "http://localhost:5500"})
 public class FinanceiroController {
+
     private final FinanceiroService financeiroService;
 
     public FinanceiroController(FinanceiroService financeiroService) {
@@ -24,12 +24,13 @@ public class FinanceiroController {
     }
 
     @GetMapping
-    public String listarFinanceiro(Model model,
-                                   @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataInicio,
-                                   @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataFim) {
+    public Map<String, Object> listarFinanceiro(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataInicio,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataFim) {
+
         List<Financeiro> registros;
-        BigDecimal totalDia = BigDecimal.ZERO;
-        BigDecimal totalMes = BigDecimal.ZERO;
+        BigDecimal totalDia;
+        BigDecimal totalMes;
 
         if (dataInicio != null && dataFim != null) {
             registros = financeiroService.buscarPorPeriodo(dataInicio.atStartOfDay(), dataFim.atTime(LocalTime.MAX));
@@ -40,23 +41,21 @@ public class FinanceiroController {
         totalDia = financeiroService.totalDoDia(LocalDate.now());
         totalMes = financeiroService.totalDoMes(LocalDate.now());
 
-        model.addAttribute("registros", registros);
-        model.addAttribute("totalDia", totalDia);
-        model.addAttribute("totalMes", totalMes);
+        Map<String, Object> response = new HashMap<>();
+        response.put("registros", registros);
+        response.put("totalDia", totalDia);
+        response.put("totalMes", totalMes);
 
-        return "financeiro";
+        return response;
     }
-
 
     @PostMapping
-    public String salvar(@Valid Financeiro financeiro) {
-        financeiroService.salvar(financeiro);
-        return "redirect:/financeiro";
+    public Financeiro salvar(@RequestBody Financeiro financeiro) {
+        return financeiroService.salvar(financeiro);
     }
 
-    @PostMapping("/remover/{id}")
-    public String remover(@PathVariable Long id) {
+    @DeleteMapping("/{id}")
+    public void remover(@PathVariable Long id) {
         financeiroService.deletar(id);
-        return "redirect:/financeiro";
     }
 }

@@ -16,18 +16,20 @@ import java.util.List;
 
 @Configuration
 public class SecurityConfig {
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
-                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // habilita CORS com nossa configuração
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/agenda/**",
                                 "/api/auth/login",
                                 "/api/auth/register",
-                                "/api/clientes/**"
+                                "/api/clientes/**",
+                                "/api/servicos/**",
+                                "/api/financeiro/**",
+                                "/api/telaAgendamento/**" // LIBERAR AQUI para seu controller
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
@@ -35,6 +37,8 @@ public class SecurityConfig {
 
         return http.build();
     }
+
+
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {

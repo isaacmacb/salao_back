@@ -2,12 +2,12 @@ package com.app.salaodesobrancelhas.controller;
 
 import com.app.salaodesobrancelhas.entity.Servico;
 import com.app.salaodesobrancelhas.service.ServicoService;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 
-@Controller
-@RequestMapping("/servicos")
+@RestController
+@RequestMapping("/api/servicos")
 @CrossOrigin(origins = {"http://127.0.0.1:5500", "http://localhost:5500"})
 public class ServicoController {
 
@@ -17,35 +17,30 @@ public class ServicoController {
         this.servicoService = servicoService;
     }
 
+
     @GetMapping
-    public String listar(org.springframework.ui.Model model) {
-        model.addAttribute("servicos", servicoService.listarTodos());
-        return "servicos/lista";
+    public List<Servico> listar() {
+        return servicoService.listarTodos();
     }
 
-    @GetMapping("/novo")
-    public String novo(org.springframework.ui.Model model) {
-        model.addAttribute("servico", new Servico());
-        return "servicos/form";
+    @GetMapping("/{id}")
+    public Servico buscar(@PathVariable Long id) {
+        return servicoService.buscarPorId(id)
+                .orElseThrow(() -> new RuntimeException("Serviço não encontrado"));
     }
 
-    @PostMapping("/salvar")
-    public String salvar(@ModelAttribute Servico servico) {
-        servicoService.salvar(servico);
-        return "redirect:/servicos";
+    @PostMapping
+    public Servico salvar(@RequestBody Servico servico) {
+        return servicoService.salvar(servico);
     }
 
-    @GetMapping("/editar/{id}")
-    public String editar(@PathVariable Long id, org.springframework.ui.Model model) {
-        model.addAttribute("servico", servicoService.buscarPorId(id));
-        return "servicos/form";
+    @PutMapping("/{id}")
+    public Servico atualizar(@PathVariable Long id, @RequestBody Servico servico) {
+        return servicoService.atualizar(id, servico);
     }
 
-    @GetMapping("/excluir/{id}")
-    public String excluir(@PathVariable Long id) {
+    @DeleteMapping("/{id}")
+    public void deletar(@PathVariable Long id) {
         servicoService.deletar(id);
-        return "redirect:/servicos";
     }
-
 }
-
