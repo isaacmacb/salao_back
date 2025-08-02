@@ -1,6 +1,8 @@
 package com.app.salaodesobrancelhas.service;
 
 import com.app.salaodesobrancelhas.entity.Agendamento;
+import com.app.salaodesobrancelhas.entity.Cliente;
+import com.app.salaodesobrancelhas.entity.Servico;
 import com.app.salaodesobrancelhas.repository.AgendamentoRepository;
 import com.app.salaodesobrancelhas.repository.ClienteRepository;
 import com.app.salaodesobrancelhas.repository.ServicoRepository;
@@ -14,47 +16,34 @@ import java.util.List;
 public class AgendaService {
 
     private final AgendamentoRepository agendamentoRepository;
-
     private final ClienteRepository clienteRepository;
-
-
     private final ServicoRepository servicoRepository;
 
-    public AgendaService(AgendamentoRepository agendamentoRepository, ClienteRepository clienteRepository, ServicoRepository servicoRepository) {
+    public AgendaService(AgendamentoRepository agendamentoRepository,
+                         ClienteRepository clienteRepository,
+                         ServicoRepository servicoRepository) {
         this.agendamentoRepository = agendamentoRepository;
         this.clienteRepository = clienteRepository;
         this.servicoRepository = servicoRepository;
     }
 
-
-    public List<Agendamento> listarAgendamentoDoDia() {
-        LocalDate hoje = LocalDate.now();
-        return agendamentoRepository.findByData(hoje);
-    }
-
     public void agendar(Long clienteId, Long servicoId, LocalDate data, LocalTime hora) {
-        if (!horarioDisponivel(data, hora)) {
-            throw new RuntimeException("Horário já está ocupado!");
-        }
+        Cliente cliente = clienteRepository.findById(clienteId)
+                .orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado"));
 
-        var cliente = clienteRepository.findById(clienteId)
-                .orElseThrow(() -> new RuntimeException("Cliente não encontrado"));
-
-        var servico = servicoRepository.findById(servicoId)
-                .orElseThrow(() -> new RuntimeException("Serviço não encontrado"));
+        Servico servico = servicoRepository.findById(servicoId)
+                .orElseThrow(() -> new IllegalArgumentException("Serviço não encontrado"));
 
         Agendamento agendamento = new Agendamento();
         agendamento.setCliente(cliente);
         agendamento.setServico(servico);
         agendamento.setData(data);
         agendamento.setHora(hora);
-        agendamento.setStatus("AGENDADO");
 
         agendamentoRepository.save(agendamento);
     }
 
-    private boolean horarioDisponivel(LocalDate data, LocalTime hora) {
-        return !agendamentoRepository.existsByDataAndHora(data, hora);
+    public List<Agendamento> listarTodos() {
+        return agendamentoRepository.findAll();
     }
-
 }
