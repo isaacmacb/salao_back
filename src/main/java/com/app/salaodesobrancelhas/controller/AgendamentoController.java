@@ -38,8 +38,22 @@ public class AgendamentoController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Agendamento>> listarTodos() {
-        List<Agendamento> lista = agendaService.listarTodos();
+    public ResponseEntity<List<Agendamento>> listar(
+            @RequestParam(required = false) String data) {
+
+        List<Agendamento> lista;
+
+        if (data != null && !data.isEmpty()) {
+            try {
+                LocalDate dataFiltro = LocalDate.parse(data);
+                lista = agendaService.buscarPorData(dataFiltro);
+            } catch (Exception e) {
+                return ResponseEntity.badRequest().build();
+            }
+        } else {
+            lista = agendaService.listarTodos();
+        }
+
         return ResponseEntity.ok(lista);
     }
 }
