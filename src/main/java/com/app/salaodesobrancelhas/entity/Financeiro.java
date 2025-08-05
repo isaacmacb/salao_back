@@ -1,5 +1,8 @@
 package com.app.salaodesobrancelhas.entity;
 
+import com.app.salaodesobrancelhas.entity.Enum.FormaPagamento;
+import com.app.salaodesobrancelhas.entity.Enum.StatusLancamento;
+import com.app.salaodesobrancelhas.entity.Enum.TipoLancamento;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -17,18 +20,15 @@ public class Financeiro {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(optional = true) // relacionamento opcional
-    @JoinColumn(name = "agendamento_id")
-    private Agendamento agendamento;
+    private LocalDateTime data;
 
-    private String tipo; // ENTRADA ou SAÍDA
+    @Enumerated(EnumType.STRING)
+    private TipoLancamento tipo;
 
-    @ManyToOne
-    private Servico servico;
-
-    private BigDecimal valor;
+    private String servico;  // Se quiser associar entidade Serviço, ajuste aqui
 
     private String descricao;
 
-    private LocalDateTime data;
+    private BigDecimal valor;
 }
+

@@ -46,4 +46,9 @@ public class AgendaService {
     public List<Agendamento> listarTodos() {
         return agendamentoRepository.findAll();
     }
+
+    public List<Agendamento> buscarPorData(LocalDate data) {
+        return agendamentoRepository.findByData(data);
+    }
+
 }

@@ -1,5 +1,6 @@
 package com.app.salaodesobrancelhas.repository;
 
+import com.app.salaodesobrancelhas.entity.Enum.TipoLancamento;
 import com.app.salaodesobrancelhas.entity.Financeiro;
 import com.app.salaodesobrancelhas.entity.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,11 +12,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface FinanceiroRepository extends JpaRepository<Financeiro, Long> {
-    List<Financeiro> findByDataBetween(LocalDateTime inicio, LocalDateTime fim); // buscar lançamentos por período
+    List<Financeiro> findByDataBetween(LocalDateTime inicio, LocalDateTime fim);
 
-    // Soma de entradas
-    @Query("SELECT SUM(f.valor) FROM Financeiro f WHERE f.tipo = :tipo AND f.data BETWEEN :inicio AND :fim")
-    BigDecimal sumByTipoAndDataBetween(@Param("tipo") String tipo,
+    @Query("SELECT COALESCE(SUM(f.valor), 0) FROM Financeiro f WHERE f.tipo = :tipo AND f.data BETWEEN :inicio AND :fim")
+    BigDecimal sumByTipoAndDataBetween(@Param("tipo") TipoLancamento tipo,
                                        @Param("inicio") LocalDateTime inicio,
                                        @Param("fim") LocalDateTime fim);
+
 }

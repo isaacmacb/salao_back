@@ -1,5 +1,6 @@
 package com.app.salaodesobrancelhas.service;
 
+import com.app.salaodesobrancelhas.entity.Enum.TipoLancamento;
 import com.app.salaodesobrancelhas.entity.Financeiro;
 import com.app.salaodesobrancelhas.repository.FinanceiroRepository;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,7 @@ public class FinanceiroService {
     public FinanceiroService(FinanceiroRepository financeiroRepository) {
         this.financeiroRepository = financeiroRepository;
     }
+
     public List<Financeiro> listarTodos() {
         return financeiroRepository.findAll();
     }
@@ -27,7 +29,7 @@ public class FinanceiroService {
     }
 
     public Financeiro salvar(Financeiro financeiro) {
-        financeiro.setData(LocalDateTime.now()); // seta a data automaticamente
+        financeiro.setData(LocalDateTime.now());
         return financeiroRepository.save(financeiro);
     }
 
@@ -35,29 +37,25 @@ public class FinanceiroService {
         financeiroRepository.deleteById(id);
     }
 
-    public List<Financeiro> buscarPorPeriodo(LocalDate inicio, LocalDate fim) {
-        LocalDateTime inicioDateTime = inicio.atStartOfDay();
-        LocalDateTime fimDateTime = fim.atTime(LocalTime.MAX);
-        return financeiroRepository.findByDataBetween(inicioDateTime, fimDateTime);
+    public List<Financeiro> buscarPorPeriodo(LocalDateTime inicio, LocalDateTime fim) {
+        return financeiroRepository.findByDataBetween(inicio, fim);
     }
 
-    public BigDecimal totalPorPeriodoETipo(LocalDate inicio, LocalDate fim, String tipo) {
-        LocalDateTime inicioDateTime = inicio.atStartOfDay();
-        LocalDateTime fimDateTime = fim.atTime(LocalTime.MAX);
-        return financeiroRepository.sumByTipoAndDataBetween(tipo, inicioDateTime, fimDateTime);
+    public BigDecimal totalPorPeriodoETipo(LocalDateTime inicio, LocalDateTime fim, TipoLancamento tipo) {
+        return financeiroRepository.sumByTipoAndDataBetween(tipo, inicio, fim);
     }
 
     public BigDecimal totalDoDia(LocalDate dia) {
-        return totalPorPeriodoETipo(dia, dia, "ENTRADA");
+        LocalDateTime inicio = dia.atStartOfDay();
+        LocalDateTime fim = dia.atTime(LocalTime.MAX);
+        return totalPorPeriodoETipo(inicio, fim, TipoLancamento.ENTRADA);
     }
 
     public BigDecimal totalDoMes(LocalDate data) {
         LocalDate primeiroDia = data.withDayOfMonth(1);
         LocalDate ultimoDia = data.withDayOfMonth(data.lengthOfMonth());
-        return totalPorPeriodoETipo(primeiroDia, ultimoDia, "ENTRADA");
-    }
-
-    public List<Financeiro> buscarPorPeriodo(LocalDateTime inicio, LocalDateTime fim) {
-        return financeiroRepository.findByDataBetween(inicio, fim);
+        LocalDateTime inicio = primeiroDia.atStartOfDay();
+        LocalDateTime fim = ultimoDia.atTime(LocalTime.MAX);
+        return totalPorPeriodoETipo(inicio, fim, TipoLancamento.ENTRADA);
     }
 }
