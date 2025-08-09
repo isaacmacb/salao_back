@@ -12,6 +12,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/auth")
 @CrossOrigin(origins = "*")
@@ -33,21 +35,23 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         try {
             Authentication auth = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
-                            loginRequest.getUsername(),  // vírgula separa username e password
+                            loginRequest.getUsername(),
                             loginRequest.getSenha()
                     )
             );
 
             if (auth.isAuthenticated()) {
-                return ResponseEntity.ok("Login realizado com sucesso!");
+                // Retorna uma resposta simples, por exemplo:
+                return ResponseEntity.ok(Map.of("message", "Login realizado com sucesso!"));
             }
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Falha no login");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Falha no login"));
         } catch (AuthenticationException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuário ou senha inválidos");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Usuário ou senha inválidos"));
         }
     }
+
 }
